@@ -97,7 +97,7 @@ if __name__ == "__main__":
     output_file_path = 'ip_details.csv'
     
     # Placeholder for the IPinfo API token
-    token = '4b3569fd2ba9da'
+    token = 'IpInfo__Token'
     
     # Read IP addresses from the file
     ip_addresses = read_ip_addresses_from_file(file_path)
