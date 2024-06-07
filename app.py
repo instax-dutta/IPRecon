@@ -1,3 +1,5 @@
+import tkinter as tk
+from tkinter import filedialog, messagebox
 import requests
 import csv
 import concurrent.futures
@@ -44,11 +46,6 @@ def get_ip_info(ip, token):
         print(f"Error retrieving information for IP {ip}: {e}")
         return {'ip': ip, 'error': str(e)}
 
-def read_ip_addresses_from_file(file_path):
-    with open(file_path, 'r') as file:
-        ip_addresses = file.read().splitlines()
-    return ip_addresses
-
 def write_ip_details_to_csv(ip_details, output_file_path, mode='w', write_header=True):
     with open(output_file_path, mode, newline='') as csvfile:
         fieldnames = [
@@ -89,21 +86,43 @@ def fetch_ip_details_concurrently(ip_addresses, token, output_file_path, max_wor
                 print(f"Error processing IP {ip}: {e}")
                 details.append({'ip': ip, 'error': str(e)})
 
-if __name__ == "__main__":
-    # Path to the file containing IP addresses
-    file_path = 'ip_addresses.txt'
+    messagebox.showinfo("Information", f"IP details have been written to {output_file_path}")
+
+def start_processing():
+    token = token_entry.get()
+    ip_addresses = ip_text.get("1.0", tk.END).strip().split('\n')
     
-    # Path to the output file
-    output_file_path = 'ip_details.csv'
+    if not token or not ip_addresses:
+        messagebox.showerror("Error", "Please provide both IPinfo token and IP addresses.")
+        return
     
-    # Placeholder for the IPinfo API token
-    token = 'IpInfo__Token'
+    output_file_path = filedialog.asksaveasfilename(defaultextension=".csv", filetypes=[("CSV files", "*.csv"), ("All files", "*.*")])
+    if not output_file_path:
+        return
     
-    # Read IP addresses from the file
-    ip_addresses = read_ip_addresses_from_file(file_path)
-    
-    # Get details for the IP addresses using multithreading and periodic updates
     fetch_ip_details_concurrently(ip_addresses, token, output_file_path)
-    
-    # Print a message indicating that the details have been written
-    print(f"IP details have been written to {output_file_path}")
+
+# Tkinter GUI setup
+root = tk.Tk()
+root.title("IpRecon by racerop")
+root.geometry("600x500")
+root.configure(bg="#2c3e50")
+
+title_label = tk.Label(root, text="IpRecon by RacerOP", font=("Helvetica", 18, "bold"), bg="#2c3e50", fg="#ecf0f1")
+title_label.pack(pady=20)
+
+frame = tk.Frame(root, bg="#34495e")
+frame.pack(pady=10, padx=20, fill="x")
+
+tk.Label(frame, text="IPinfo Token:", font=("Helvetica", 12), bg="#34495e", fg="#ecf0f1").grid(row=0, column=0, padx=10, pady=10, sticky="e")
+token_entry = tk.Entry(frame, width=50)
+token_entry.grid(row=0, column=1, padx=10, pady=10)
+
+tk.Label(frame, text="IP Addresses (one per line):", font=("Helvetica", 12), bg="#34495e", fg="#ecf0f1").grid(row=1, column=0, padx=10, pady=10, sticky="ne")
+ip_text = tk.Text(frame, width=50, height=15)
+ip_text.grid(row=1, column=1, padx=10, pady=10)
+
+process_button = tk.Button(root, text="Start Processing", command=start_processing, bg="#e74c3c", fg="#ecf0f1", font=("Helvetica", 12))
+process_button.pack(pady=20)
+
+root.mainloop()
